@@ -16,10 +16,7 @@ things like:
 ```bash
 uv sync
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-uv run python ./reasoncv/texttrial.py
 ```
-
-Install the package and development dependencies:
 
 ## Usage
 
@@ -30,7 +27,7 @@ The `texttrial.py` script lets you test ReasonCV ops interactively. You can prov
 Run with the default test image:
 
 ```bash
-python -m reasoncv.texttrial
+uv run python ./reasoncv/texttrial.py
 ```
 
 (You can specify your own image by passing the `--image` flag.)
@@ -50,8 +47,7 @@ threshold: 0.5
 <op>
 function: zoom
 center: [0.5, 0.5]
-height: 0.3
-width: 0.3
+size: [0.3, 0.3]
 </op>
 
 # Estimate depth
@@ -67,3 +63,11 @@ Each op will process the image and display the results inline in your terminal.
 Each operation is called an "RCV-Op" and can be requested by the model inside its `<think>` section. They are initiated by the reasoning step outputting the `<op>` tag and then a YAML-formatted string that describes the operation.
 
 Note that image coordinates are always specified in normalized coordinates (0 to 1), with the upper left corner being (0, 0) and the lower right corner being (1, 1) for the original input image.
+
+
+## Testing
+
+```bash
+uv run pytest
+```
+

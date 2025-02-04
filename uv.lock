@@ -1302,7 +1302,7 @@ requires-dist = [
     { name = "pytest", specifier = ">=8.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "qwen-vl-utils", specifier = ">=0.0.10" },
-    { name = "timm", specifier = ">=0.9.2" },
+    { name = "timm", specifier = ">=1.0" },
     { name = "torch", specifier = ">=2.6.0" },
     { name = "torchvision", specifier = ">=0.21.0" },
     { name = "transformers", git = "https://github.com/huggingface/transformers.git?rev=main" },
