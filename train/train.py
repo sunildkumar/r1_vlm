@@ -28,7 +28,7 @@ model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
 peft_config = LoraConfig(
     lora_alpha=16,
     lora_dropout=0.05,
-    r=8,
+    r=4,
     bias="none",
     target_modules=["q_proj", "v_proj"],
     task_type="CAUSAL_LM",
@@ -57,7 +57,7 @@ training_args = GRPOConfig(
     # TOOD: Make sure these are right
     max_prompt_length=1024,
     max_completion_length=1024,  # max length of the generated output for our solution
-    num_generations=5,
+    num_generations=3,
     beta=0.001,
     # TODO: True? using vllm seems like a good idea.
     use_vllm=False,
