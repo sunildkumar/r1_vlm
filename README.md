@@ -23,6 +23,12 @@ Custom fork of TRL for GRPO on VLMs: https://github.com/sunildkumar/trl. As of t
 ```
 # run from root of repo
 uv run accelerate launch --config_file train/multi_gpu.yaml  train/train.py
+
+uv run accelerate launch --config_file train/multi_gpu.yaml  train/train_counting.py
+
+CUDA_VISIBLE_DEVICES=1,2,3 uv run accelerate launch --config_file train/multi_gpu_3only.yaml  train/train_counting.py
+
+CUDA_VISIBLE_DEVICES=1 uv run train/train_counting.py
 ```
 
 ## Results
