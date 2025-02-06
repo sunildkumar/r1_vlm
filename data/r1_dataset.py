@@ -57,7 +57,7 @@ def generate_r1_messages(example: dict) -> dict:
         {
             "role": "assistant",
             "content": [
-                {"type": "text", "text": "Let me solve this step by step.\n<think>"}
+                {"type": "text", "text": "Let me solve this step by step.\n<think> First I'll call the count tool: "}
             ],
         },
     ]
