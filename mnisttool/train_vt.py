@@ -6,6 +6,7 @@ import torch
 from vision_tool import ImageLoaderTool
 from training_config import vision_ppo_config, training_args
 
+
 def initialize_components() -> tuple[AutoTokenizer, AutoModelForCausalLMWithValueHead, ImageLoaderTool, PPOTrainer]:
     # Initialize components
     tokenizer = AutoTokenizer.from_pretrained(vision_ppo_config.tokenizer_name)
@@ -44,6 +45,33 @@ def vision_collator(batch):
         "attention_mask": text["attention_mask"],
         "pixel_values": images["image_features"]
     }
+
+def custom_generation_hook(query_tensors, model, **kwargs):
+    # Handle multi-tool generation logic
+    responses = []
+    for query in query_tensors:
+        # 1. Generate initial tool selection
+        tool_output = model.generate(
+            input_ids=query.unsqueeze(0),
+            max_new_tokens=50,
+            use_cache=True
+        )
+        
+        # 2. Parse tool invocation
+        tool_name, tool_args = parse_tool_invocation(tool_output)
+        
+        # 3. Execute tool
+        tool_result = tools[tool_name](tool_args)
+        
+        # 4. Generate final response with tool context
+        full_response = model.generate(
+            input_ids=query.unsqueeze(0),
+            pixel_values=tool_result["image_features"],
+            max_new_tokens=100
+        )
+        responses.append(full_response)
+    
+    return responses
 
 
 def main():

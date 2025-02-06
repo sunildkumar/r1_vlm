@@ -7,6 +7,8 @@ from transformers import Tool
 from qwen_vl_utils import QWenTokenizer, get_image_feature
 import torch
 
+from .vision_toolkit import MultiModalProcessor
+
 class ImageLoaderTool(Tool):
     name = "image_loader"
     description = "Loads JPEG images from /data/images directory"
@@ -41,3 +43,21 @@ class ImageLoaderTool(Tool):
             raise ValueError("File does not exist")
 
 
+class ToolResponseTokenizer:
+    def __init__(self, tokenizer, tools):
+        self.tokenizer = tokenizer
+        self.tool_processor = MultiModalProcessor(tokenizer, tools)
+        
+    def __call__(self, examples):
+        processed = self.tool_processor(examples)
+        
+        # Convert tool outputs to model's expected format
+        image_features = torch.stack(
+            [out["image_features"] for out in processed["tool_outputs"]]
+        ) if "image_loader" in examples else None
+        
+        return {
+            "input_ids": processed["input_ids"],
+            "attention_mask": processed["attention_mask"],
+            "pixel_values": image_features
+        }
