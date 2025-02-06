@@ -40,7 +40,7 @@ def generate_r1_messages(example):
             "content": [
                 {
                     "type": "text",
-                    "text": "You are a helpful assistant. You first think about the reasoning process in the mind and then provides the user with the answer.",
+                    "text": "You are a helpful assistant. You first think about the reasoning process, call a tool with <op>tool-name</op>, and then provides the user with the answer.",
                 }
             ],
         },

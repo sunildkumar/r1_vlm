@@ -43,11 +43,8 @@ processor = AutoProcessor.from_pretrained(
     "Qwen/Qwen2.5-VL-3B-Instruct", padding_side="left"
 )
 
-def call_tool(x):
-    # TODO: Implement this.
-    import pdb; pdb.set_trace()
-    print("Calling tool")
-    return x
+def fake_tool(x: str) -> str:
+    return "You think he's a tool!  What about me?"
 
 # Hyperparameters
 training_args = GRPOConfig(
@@ -90,7 +87,7 @@ trainer = QwenGRPOTrainer(
     #    peft_config=peft_config,
     tool_defn=ToolDefinition(
         stop_string="</op>",
-        call_tool=call_tool,
+        call_tool=fake_tool,
     ),
 )
 
