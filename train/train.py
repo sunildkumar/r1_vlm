@@ -10,7 +10,7 @@ from reward_fns import (
 )
 from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 from trl import GRPOConfig, ModelConfig
-from trl.trainer import QwenGRPOTrainer
+from trl.trainer import QwenGRPOTrainer, ToolDefinition
 
 print(trl.__file__)
 
@@ -42,6 +42,12 @@ peft_config = LoraConfig(
 processor = AutoProcessor.from_pretrained(
     "Qwen/Qwen2.5-VL-3B-Instruct", padding_side="left"
 )
+
+def call_tool(x):
+    # TODO: Implement this.
+    import pdb; pdb.set_trace()
+    print("Calling tool")
+    return x
 
 # Hyperparameters
 training_args = GRPOConfig(
@@ -82,6 +88,10 @@ trainer = QwenGRPOTrainer(
     train_dataset=dataset["train"],
     eval_dataset=dataset["validation"],
     #    peft_config=peft_config,
+    tool_defn=ToolDefinition(
+        stop_string="</op>",
+        call_tool=call_tool,
+    ),
 )
 
 trainer.train()
