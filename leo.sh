@@ -4,6 +4,10 @@ set -ex
 
 export CUDA_VISIBLE_DEVICES=0
 
+
+time uv run python train/train.py
+exit
+
 time uv run accelerate launch \
     --config_file train/single_gpu.yaml \
     --main_process_port 29701 \
