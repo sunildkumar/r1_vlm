@@ -32,10 +32,8 @@ def generate_r1_messages(example: dict) -> dict:
     # add standard ending and grounding reminder to the message
     ending = "Show your work in <think> </think> tags and return the answer in <answer> </answer> tags. If the answer is not an integer, truncate it to 2 decimal places. "
     grounding = (
-        'Remember you have visual grounding capabilities and you can output bbox coordinates '
-        'or key points in JSON format. Bbox example: {"bbox_2d": [74, 58, 526, 619], "label": "person"}. '
-        'Keypoint example: {"point_2d": ["38", "314"], "label": "person"}. '
-        "You should NOT attempt to count without using visual grounding as it is not accurate."
+        'Remember you have the ability to use tools, and they can give you strong hints about the answer. '
+        'You should NOT attempt to count without using a tool, which you can call with <op>name-of-tool</op>. '
     )
     operation_message += ending + grounding
 
