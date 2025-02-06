@@ -16,7 +16,6 @@ from trl.trainer import QwenGRPOTrainer, ToolDefinition
 print(trl.__file__)
 
 def fake_tool(x: str) -> str:
-    import pdb; pdb.set_trace()
     return "You think he's a tool!  What about me?"
 
 def parse_cli_args() -> argparse.Namespace:
