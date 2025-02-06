@@ -5,7 +5,9 @@ set -ex
 export CUDA_VISIBLE_DEVICES=0
 
 
-time uv run python train/train.py
+time uv run python train/train.py \
+    --load_from_local --local_path /home/leo/r1dev/_localdata/cocomath/
+
 exit
 
 #time uv run accelerate launch \
