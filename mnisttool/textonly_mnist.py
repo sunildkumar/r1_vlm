@@ -30,6 +30,13 @@ class TextOnlyMNIST:
         home = os.path.expanduser("~")
         return os.path.join(home, "data", "obfuscated_mnist")
 
+    def image_path(self, code: str) -> str:
+        return os.path.join(self.base_image_path, f"img-{code}.jpeg")
+
+    def random_image_path(self) -> str:
+        random_code = random.choice(self.codes)
+        return self.image_path(random_code)
+
     def generate_r1_messages(self, code:str) -> dict:
         counting_message = f"Use the tool to load the the image named {code} and tell me what number it is."
         ending = "Show your work in <think> </think> tags and return the answer in <answer> </answer> tags."
@@ -50,7 +57,7 @@ class TextOnlyMNIST:
             {
                 "role": "user",
                 "content": [
-                    #{"type": "image", "image": image_path},
+                    {"type": "image", "image": self.random_image_path()},
                     {"type": "text", "text": instruction},
                 ],
             },
@@ -89,18 +96,21 @@ class TextOnlyMNIST:
         num_codes = len(self.codes)
         if split == "train":
             codes = self.codes[:int(num_codes * 0.8)]
-        elif split == "test":
+        elif split == "validation":
             codes = self.codes[int(num_codes * 0.8):]
         else:
             raise ValueError(f"Invalid split: {split}")
 
-        return Dataset.from_list([self.generate_r1_messages(code) for code in codes])
+        msgs = []
+        for code in tqdm(codes, desc=f"{split} messages"):
+            msgs.append(self.generate_r1_messages(code))
+        return Dataset.from_list(msgs)
 
 
 def main(args: argparse.Namespace):
     thing = TextOnlyMNIST(args.mnist_codes_path)
     all = {}
-    for split in ["train", "test"]:
+    for split in ["train", "validation"]:
         dataset = thing.generate_split(split)
         all[split] = dataset
     dsd = DatasetDict(all)
