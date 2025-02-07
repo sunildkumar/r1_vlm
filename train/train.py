@@ -2,6 +2,7 @@ from typing import Callable
 import argparse
 import re
 import json
+import os
 
 from datasets import load_dataset, load_from_disk
 from peft import LoraConfig
@@ -37,7 +38,7 @@ class ImageMetadataReadTool:
     """Tool that pretends to load an image, but actually reads the metadata next to the image.
     """
     def __init__(self, img_path: str):
-        self.img_path = img_path
+        self.img_path = os.path.expanduser(img_path)
         self.parser = VerySimpleParser()
 
     def __call__(self, completion: str) -> str:
@@ -70,7 +71,8 @@ class ImageMetadataReadTool:
         """Read the metadata from the file."""
         # replace .jpeg with .json
         filename = filename.replace(".jpeg", ".json")
-        data = json.load(open(filename))
+        path = os.path.join(self.img_path, filename)
+        data = json.load(open(path))
         return data
 
 
@@ -213,7 +215,7 @@ def main(args: argparse.Namespace):
         peft_config=peft_config,
         tool_defn=ToolDefinition(
             stop_string="</op>",
-            call_tool=ImageMetadataReadTool(img_path=args.tool_img_path),
+            call_tool=ImageMetadataReadTool(img_path=os.path.expanduser(args.tool_img_path)),
         ),
     )
     trainer.train()
