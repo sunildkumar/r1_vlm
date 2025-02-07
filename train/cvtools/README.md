@@ -1,4 +1,4 @@
-# Reason-CV
+# CV Tools
 
 An environment for "Reasoning VLMs" (RVLMs) which are able to interact with visual input data by asking for
 things like:
