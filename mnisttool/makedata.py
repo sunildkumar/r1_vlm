@@ -37,7 +37,7 @@ def main():
     Each image is resized to 224x224 pixels and saved as a JPEG with a randomized filename.
     A corresponding JSON file with the label is saved next to each image.
     """
-    data_dir = Path("./data")
+    data_dir = Path("~/data/obfuscated_mnist").expanduser()
     data_dir.mkdir(exist_ok=True, parents=True)
 
     print("Downloading MNIST dataset (training set)...")
