@@ -1,22 +1,25 @@
-import trl
-from datasets import load_dataset, load_from_disk
+from typing import Callable
 import argparse
+
+from datasets import load_dataset, load_from_disk
 from peft import LoraConfig
 from prepare_inputs import tokenize_and_inject_images
+from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+from trl import GRPOConfig, ModelConfig
+from trl.trainer import QwenGRPOTrainer, ToolDefinition
+import trl
+
+
 from reward_fns import (
     answer_reward_func,
     bounding_box_presence_reward_func,
     format_reward_func,
     soft_answer_reward_func,
 )
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
-from trl import GRPOConfig, ModelConfig
-from trl.trainer import QwenGRPOTrainer, ToolDefinition
-
-print(trl.__file__)
 
 def fake_tool(x: str) -> str:
     return "You think he's a tool!  What about me?"
+
 
 def parse_cli_args() -> argparse.Namespace:
     """
@@ -24,6 +27,12 @@ def parse_cli_args() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         description="Train Qwen2.5-VL model with GRPOTrainer. Specify dataset load options."
+    )
+    parser.add_argument(
+        "--rewards",
+        type=str,
+        default="cocomath",
+        help="Which rewards to use",
     )
     parser.add_argument(
         "--load_from_local",
@@ -37,6 +46,24 @@ def parse_cli_args() -> argparse.Namespace:
         help="Local directory to load the dataset from",
     )
     return parser.parse_args()
+
+
+def pick_rewards(args: argparse.Namespace) -> list[Callable]:
+    if args.rewards == "cocomath":
+        return [
+            format_reward_func,
+            answer_reward_func,
+            soft_answer_reward_func,
+            bounding_box_presence_reward_func,
+        ]
+    elif args.rewards == "mnist":
+        return [
+            answer_reward_func,
+            # TODO: put a soft reward back in
+            # soft_answer_reward_func,  # this requires class_1, class_2, count_1, count_2
+        ]
+    else:
+        raise ValueError(f"Unknown rewards: {args.rewards}")
 
 def main(args: argparse.Namespace):
     """
@@ -103,12 +130,7 @@ def main(args: argparse.Namespace):
 
     trainer = QwenGRPOTrainer(
         model=model,
-        reward_funcs=[
-            format_reward_func,
-            answer_reward_func,
-            soft_answer_reward_func,
-            bounding_box_presence_reward_func,
-        ],
+        reward_funcs=pick_rewards(args),
         processing_class=processor,
         args=training_args,
         tokenize_and_inject_images=tokenize_and_inject_images,

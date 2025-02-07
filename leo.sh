@@ -6,4 +6,5 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 time uv run python train/train.py \
-    --load_from_local --local_path $HOME/data/textcodes
+    --load_from_local --local_path $HOME/data/textcodes \
+    --rewards mnist
