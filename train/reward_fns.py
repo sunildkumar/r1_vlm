@@ -67,6 +67,30 @@ def format_numeric_answer_reward_func(completions, target, **kwargs):
     return rewards
 
 
+def tool_use_reward_func(completions, target, **kwargs):
+    """
+    Checks if the string inside <op>...</op> parses as a tool call.
+    Returns:
+        list[float]: Reward scores
+    """
+    rewards = []
+
+    for completion_conv, gt in zip(completions, target):
+        try:
+            # Look for <op>...</op>
+            match = re.search(r"<op>(.*?)<\/op>", completion_conv[0]["content"])
+            if match is None:
+                rewards.append(0.0)
+            else:
+                rewards.append(1.0)
+
+        except Exception as e:
+            print(f"Error in tool_use_reward_func: {e}")
+            rewards.append(0.0)
+
+    return rewards
+
+
 def answer_reward_func(completions, target, **kwargs):
     """
     Evaluates completions based on mathematical correctness of the answer

@@ -18,6 +18,7 @@ from reward_fns import (
     format_reward_func,
     format_numeric_answer_reward_func,
     soft_answer_reward_func,
+    tool_use_reward_func,
 )
 
 
@@ -134,9 +135,8 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
         return [
             format_reward_func,
             format_numeric_answer_reward_func,
+            tool_use_reward_func,
             answer_reward_func,
-            # TODO: put a soft reward back in
-            # soft_answer_reward_func,  # this requires class_1, class_2, count_1, count_2
         ]
     else:
         raise ValueError(f"Unknown rewards: {args.rewards}")
