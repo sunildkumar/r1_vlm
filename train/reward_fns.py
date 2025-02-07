@@ -38,6 +38,35 @@ def format_reward_func(completions, target, **kwargs):
     return rewards
 
 
+def format_numeric_answer_reward_func(completions, target, **kwargs):
+    """
+    Checks if the string inside <answer> parses as a float.
+      Returns:
+          list[float]: Reward scores
+    """
+    rewards = []
+
+    for completion_conv, gt in zip(completions, target):
+        try:
+            # Look for <answer>...</answer>
+            match = re.search(r"<answer>([\s\S]*?)<\/answer>", completion_conv[0]["content"])
+            if match is None:
+                rewards.append(0.0)
+                continue
+
+            answer = match.group(1).strip()
+            try:
+                float(answer)
+                rewards.append(1.0)
+            except ValueError:
+                rewards.append(0.0)
+        except Exception as e:
+            print(f"Error in format_reward_func: {e}")
+            rewards.append(0.0)
+
+    return rewards
+
+
 def answer_reward_func(completions, target, **kwargs):
     """
     Evaluates completions based on mathematical correctness of the answer

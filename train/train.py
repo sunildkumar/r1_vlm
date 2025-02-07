@@ -16,6 +16,7 @@ from reward_fns import (
     answer_reward_func,
     bounding_box_presence_reward_func,
     format_reward_func,
+    format_numeric_answer_reward_func,
     soft_answer_reward_func,
 )
 
@@ -131,6 +132,8 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
         ]
     elif args.rewards == "mnist":
         return [
+            format_reward_func,
+            format_numeric_answer_reward_func,
             answer_reward_func,
             # TODO: put a soft reward back in
             # soft_answer_reward_func,  # this requires class_1, class_2, count_1, count_2
