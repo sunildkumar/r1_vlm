@@ -3,6 +3,8 @@ import re
 # https://www.philschmid.de/mini-deepseek-r1#3-train-the-model-using-grpo-educational-part was the best reference for this
 import numpy as np
 
+from counting_reward_fns import print_reward
+
 
 def format_reward_func(completions, target, **kwargs):
     """
@@ -89,6 +91,15 @@ def tool_use_reward_func(completions, target, **kwargs):
             print(f"Error in tool_use_reward_func: {e}")
             rewards.append(0.0)
 
+    print_reward(
+        "tool_use_reward_func",
+        kwargs.get("prompts", []),
+        completions,
+        "n/a", # target
+        rewards,
+        [], # no additional fields displayed
+        kwargs,
+    )
     return rewards
 
 

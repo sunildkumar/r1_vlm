@@ -133,6 +133,12 @@ def parse_cli_args() -> argparse.Namespace:
         default=5e-7,
         help="Learning rate",
     )
+    parser.add_argument(
+        "--num_generations",
+        type=int,
+        default=5,
+        help="Number of generations to use",
+    )
     return parser.parse_args()
 
 
@@ -217,7 +223,7 @@ def main(args: argparse.Namespace):
         # TOOD: Make sure these are right
         max_prompt_length=1024,
         max_completion_length=args.max_completion_length,
-        num_generations=3,
+        num_generations=args.num_generations,
         beta=0.001,
         # TODO: True? using vllm seems like a good idea.
         use_vllm=False,

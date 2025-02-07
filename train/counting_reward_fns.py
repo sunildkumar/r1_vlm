@@ -1,8 +1,11 @@
+import os
 import re
 
 import numpy as np
 
 # https://www.philschmid.de/mini-deepseek-r1#3-train-the-model-using-grpo-educational-part was the best reference for this
+
+SHOULD_PRINT_REWARD = os.environ.get("SHOULD_PRINT_REWARD", "true").lower() == "true"
 
 
 def print_reward(
@@ -26,6 +29,9 @@ def print_reward(
         additional_fields (list[str]): List of additional field names to print from kwargs
         reward_function_kwargs (dict): Kwargs containing additional data fields
     """
+    if not SHOULD_PRINT_REWARD:
+        return
+
     print(f"\nExecuting {function_name}")
     print("=" * 100)
 
