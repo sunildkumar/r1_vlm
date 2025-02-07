@@ -173,3 +173,9 @@ cython_debug/
 /vlm-r1-aha-moment
 /wandb
 /vlm-r1-aha-moment-first-successful-run
+/vlm-r1-aha-moment-counting-only
+/vlm-r1-aha-moment-counting-only-step2
+/vlm-r1-digit-recognition
+/vlm-r1-digit-recognition-run-1
+# folder with the data for counting mnist
+counting-mnist/

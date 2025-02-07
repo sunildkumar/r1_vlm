@@ -16,7 +16,7 @@ print(trl.__file__)
 
 
 # 100k-ish examples
-dataset = load_dataset("sunildkumar/coco-counts-r1")
+dataset = load_dataset("sunildkumar/coco-counts-balanced-r1")
 
 
 # load the model
@@ -52,8 +52,10 @@ training_args = GRPOConfig(
     lr_scheduler_type="cosine",
     warmup_steps=25,
     logging_steps=1,
-    save_steps=5,
-    # roughly 1M total training steps
+    save_steps=20,
+    # ckpts are 51 gb each!!
+    save_total_limit= 50,
+
     num_train_epochs=1,
     per_device_train_batch_size=1,
     # TODO: increase this to 4

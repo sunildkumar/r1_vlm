@@ -66,10 +66,13 @@ def answer_reward_func(completions, target, **kwargs):
     Returns:
         list[float]: Reward scores
     """
-
+    SHOULD_PRINT_REWARD = True
     rewards = []
 
     for completion_conv, gt in zip(completions, target):
+        if type(gt) != int:
+            raise ValueError(f"Target is not an int: {gt}! This is unexpected.")
+        
         try:
             # add synthetic <think> as its already part of the prompt and prefilled for the assistant to more easily match the regex
             completion = "<think>" + completion_conv[0]["content"]
@@ -88,11 +91,11 @@ def answer_reward_func(completions, target, **kwargs):
             if not re.match(allowed_pattern, answer):
                 rewards.append(0.0)
                 continue
+            
+            
+            # convert to floats for comparison
+            gt = float(gt)
 
-            # check if float(answer) == gt (target is already a float)
-            assert isinstance(gt, float), "target is not a float but a %s" % type(gt)
-
-            # convert answer to float
             answer = float(answer)
 
             # check if the two are within e-5 of each other
@@ -105,16 +108,16 @@ def answer_reward_func(completions, target, **kwargs):
             print(f"Error in answer_reward_func: {e}")
             rewards.append(0.0)
 
-    # Print results using print_reward function
-    print_reward(
-        "answer_reward_func",
-        kwargs.get("prompts", []),
-        completions,
-        target,
-        rewards,
-        ["class_1"],
-        kwargs,
-    )
+    if SHOULD_PRINT_REWARD:
+        print_reward(
+            "answer_reward_func",
+            kwargs.get("prompts", []),
+            completions,
+            target,
+            rewards,
+            ["class_1"],
+            kwargs,
+        )
 
     return rewards
 
@@ -132,7 +135,7 @@ def soft_answer_reward_func(completions, target, **kwargs):
     Returns:
         list[float]: Reward scores
     """
-
+    SHOULD_PRINT_REWARD = True
     rewards = []
 
     for completion_conv, gt in zip(completions, target):
@@ -155,8 +158,8 @@ def soft_answer_reward_func(completions, target, **kwargs):
                 rewards.append(0.0)
                 continue
 
-            # check if float(answer) == gt (target is already a float)
-            assert isinstance(gt, float), "target is not a float but a %s" % type(gt)
+            assert isinstance(gt, int), "target is not an int but a %s" % type(gt)
+            gt = float(gt)
 
             # convert answer to float
             answer = float(answer)
@@ -176,16 +179,17 @@ def soft_answer_reward_func(completions, target, **kwargs):
         except Exception as e:
             print(f"Error in answer_reward_func: {e}")
             rewards.append(0.0)
-    # Print results using print_reward function
-    print_reward(
-        "soft_answer_reward_func",
-        kwargs.get("prompts", []),
-        completions,
-        target,
-        rewards,
-        ["class_1"],
-        kwargs,
-    )
+            
+    if SHOULD_PRINT_REWARD:
+        print_reward(
+            "soft_answer_reward_func",
+            kwargs.get("prompts", []),
+            completions,
+            target,
+            rewards,
+            ["class_1"],
+            kwargs,
+        )
 
     return rewards
 
@@ -200,7 +204,13 @@ def bounding_box_reward_func(completions, target, **kwargs):
 
     Returns:
         list[float]: Reward scores based on the count of detected bounding boxes and keypoints
+        
+    See https://www.desmos.com/calculator/zt4mng4dst for plot of reward function
     """
+    SHOULD_PRINT_REWARD = True
+    
+    # multiply the reward by this factor. Otherwise the reward isn't motivating enough. 
+    REWARD_FACTOR = 30 
     rewards = []
 
     for completion_conv, gt in zip(completions, target):
@@ -224,19 +234,30 @@ def bounding_box_reward_func(completions, target, **kwargs):
             )
 
             total_detected = len(bbox_matches) + len(keypoint_matches)
-            reward = min(1, total_detected / gt)
+            
+            if total_detected <= gt:
+                reward = total_detected / gt
+            else:
+                # Exponential decay for excess detections
+                excess = total_detected - gt
+                reward = np.exp(-excess / gt)
+            
+            reward = reward * REWARD_FACTOR
+            
             rewards.append(reward)
         except Exception as e:
             print(f"Error in bounding_box_reward_func: {e}")
             rewards.append(0.0)
 
-    print_reward(
-        "bounding_box_reward_func",
-        kwargs.get("prompts", []),
-        completions,
-        target,
-        rewards,
-        ["class_1"],
-        kwargs,
-    )
+    if SHOULD_PRINT_REWARD:
+        print_reward(
+            "bounding_box_reward_func",
+            kwargs.get("prompts", []),
+            completions,
+            target,
+            rewards,
+            ["class_1"],
+            kwargs,
+        )
+
     return rewards
