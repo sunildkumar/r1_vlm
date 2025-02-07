@@ -37,6 +37,15 @@ def format_reward_func(completions, target, **kwargs):
             print(f"Error in format_reward_func: {e}")
             rewards.append(0.0)
 
+    print_reward(
+        "format_reward_func",
+        kwargs.get("prompts", []),
+        completions,
+        target,
+        rewards,
+        [], # no additional fields displayed
+        kwargs,
+    )
     return rewards
 
 
@@ -67,6 +76,15 @@ def format_numeric_answer_reward_func(completions, target, **kwargs):
             print(f"Error in format_reward_func: {e}")
             rewards.append(0.0)
 
+    print_reward(
+        "format_numeric_answer_reward_func",
+        kwargs.get("prompts", []),
+        completions,
+        target,
+        rewards,
+        [], # no additional fields displayed
+        kwargs,
+    )
     return rewards
 
 
@@ -95,7 +113,7 @@ def tool_use_reward_func(completions, target, **kwargs):
         "tool_use_reward_func",
         kwargs.get("prompts", []),
         completions,
-        "n/a", # target
+        target,
         rewards,
         [], # no additional fields displayed
         kwargs,
@@ -154,6 +172,15 @@ def answer_reward_func(completions, target, **kwargs):
             print(f"Error in answer_reward_func: {e}")
             rewards.append(0.0)
 
+    print_reward(
+        "answer_reward_func",
+        kwargs.get("prompts", []),
+        completions,
+        target,
+        rewards,
+        [], # no additional fields displayed
+        kwargs,
+    )
     return rewards
 
 

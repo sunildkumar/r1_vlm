@@ -42,11 +42,11 @@ def print_reward(
         prompt_cleaned = re.sub(
             r"(<\|image_pad\|>)+", "{... many image pad tokens ...}", prompt
         )
-        print(f"Function name: {function_name}")
         print(f"Sample {idx + 1}:")
         print(f"Prompt:\n{prompt_cleaned}")
         print(f"Completion:\n{completion_conv[0]['content']}")
         print(f"Target: {gt}")
+        print(f"Function name: {function_name}")
         print(f"Reward: {reward}")
 
         # Print any additional fields requested
