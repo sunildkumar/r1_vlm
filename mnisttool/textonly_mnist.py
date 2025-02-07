@@ -40,7 +40,7 @@ class TextOnlyMNIST:
     def generate_r1_messages(self, code:str) -> dict:
         counting_message = f"Use the tool to load the the image named 'img-{code}.jpeg' and tell me what number it is."
         ending = "Show your work in <think> </think> tags and return the answer in <answer> </answer> tags."
-        tool_message = "You can invoke a tool by thinking <op>load: filename</op>"
+        tool_message = "If you need to load an image, you can use the image tool as follows: write the command <op>load: filename</op> and the image will be loaded."
 
         instruction = f"{counting_message} {ending}"
 
