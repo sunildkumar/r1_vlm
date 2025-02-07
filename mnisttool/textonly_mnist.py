@@ -38,9 +38,9 @@ class TextOnlyMNIST:
         return self.image_path(random_code)
 
     def generate_r1_messages(self, code:str) -> dict:
-        counting_message = f"Use the tool to load the the image named {code} and tell me what number it is."
+        counting_message = f"Use the tool to load the the image named 'img-{code}.jpeg' and tell me what number it is."
         ending = "Show your work in <think> </think> tags and return the answer in <answer> </answer> tags."
-        tool_message = "You can invoke a tool by thinking <op>tool</op>"
+        tool_message = "You can invoke a tool by thinking <op>load: filename</op>"
 
         instruction = f"{counting_message} {ending}"
 
@@ -71,7 +71,7 @@ class TextOnlyMNIST:
 
         return {
             "messages": messages,
-            "target": self.files[code]["label"],
+            "target": float(self.files[code]["label"]),
         }
 
 
