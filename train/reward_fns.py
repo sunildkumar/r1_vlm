@@ -59,7 +59,8 @@ def format_numeric_answer_reward_func(completions, target, **kwargs):
                 float(answer)
                 rewards.append(1.0)
             except ValueError:
-                rewards.append(0.0)
+                # Partial credit for getting any answer at all
+                rewards.append(0.5)
         except Exception as e:
             print(f"Error in format_reward_func: {e}")
             rewards.append(0.0)

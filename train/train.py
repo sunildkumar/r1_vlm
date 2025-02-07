@@ -120,6 +120,12 @@ def parse_cli_args() -> argparse.Namespace:
         action="store_true",
         help="Use LoRA for training",
     )
+    parser.add_argument(
+        "--max_completion_length",
+        type=int,
+        default=1024,
+        help="Maximum completion length",
+    )
     return parser.parse_args()
 
 
@@ -133,7 +139,7 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
         ]
     elif args.rewards == "mnist":
         return [
-            format_reward_func,
+            #format_reward_func,  # Not sure this is working properly
             format_numeric_answer_reward_func,
             tool_use_reward_func,
             answer_reward_func,
@@ -199,7 +205,7 @@ def main(args: argparse.Namespace):
         # GRPO specific parameters
         # TOOD: Make sure these are right
         max_prompt_length=1024,
-        max_completion_length=1024,  # max length of the generated output for our solution
+        max_completion_length=args.max_completion_length,
         num_generations=3,
         beta=0.001,
         # TODO: True? using vllm seems like a good idea.
