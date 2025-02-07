@@ -32,7 +32,8 @@ class VerySimpleParser():
         start = completion.find("<op>")
         end = completion.find("</op>")  
         if start == -1 or end == -1:
-            raise ValueError("No <op>...</op> string found in completion")
+            # Don't include "<op>...</op>" in the response because that triggers the reward
+            raise ValueError("Op command tag not found in completion")
         return completion[start+len("<op>"):end]
 
 
@@ -126,6 +127,12 @@ def parse_cli_args() -> argparse.Namespace:
         default=1024,
         help="Maximum completion length",
     )
+    parser.add_argument(
+        "--learning_rate",
+        type=float,
+        default=5e-7,
+        help="Learning rate",
+    )
     return parser.parse_args()
 
 
@@ -143,6 +150,10 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
             format_numeric_answer_reward_func,
             tool_use_reward_func,
             answer_reward_func,
+        ]
+    elif args.rewards == "justtool":
+        return [
+            tool_use_reward_func,
         ]
     else:
         raise ValueError(f"Unknown rewards: {args.rewards}")
@@ -190,7 +201,7 @@ def main(args: argparse.Namespace):
     # Hyperparameters
     training_args = GRPOConfig(
         output_dir="vlm-r1-aha-moment",
-        learning_rate=5e-7,
+        learning_rate=args.learning_rate,
         lr_scheduler_type="cosine",
         warmup_ratio=0.001,  #  1M examples * 0.001 = 1000 steps
         logging_steps=1,
