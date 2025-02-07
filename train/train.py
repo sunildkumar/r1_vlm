@@ -40,9 +40,10 @@ class VerySimpleParser():
 class ImageMetadataReadTool:
     """Tool that pretends to load an image, but actually reads the metadata next to the image.
     """
-    def __init__(self, img_path: str):
+    def __init__(self, img_path: str, return_nothing: bool = False):
         self.img_path = os.path.expanduser(img_path)
         self.parser = VerySimpleParser()
+        self.return_nothing = return_nothing
 
     def __call__(self, completion: str) -> str:
         op_str = self.parser.extract_op_str(completion)
@@ -53,8 +54,11 @@ class ImageMetadataReadTool:
     
     def format_response(self, data: dict) -> str:
         """Format the response as a string."""
-        j = json.dumps(data)
-        return f"Image metadata: {j}"
+        if self.return_nothing:
+            return ""
+        else:
+            j = json.dumps(data)
+            return f"Image metadata: {j}"
 
     def parse_input(self, x: str) -> str:
         """Parse the input string to get the filename."""
@@ -138,6 +142,11 @@ def parse_cli_args() -> argparse.Namespace:
         type=int,
         default=5,
         help="Number of generations to use",
+    )
+    parser.add_argument(
+        "--tool_return_nothing",
+        action="store_true",
+        help="Return nothing from the tool",
     )
     return parser.parse_args()
 
@@ -230,6 +239,11 @@ def main(args: argparse.Namespace):
         report_to="wandb",
     )
 
+    tool = ImageMetadataReadTool(
+        img_path=os.path.expanduser(args.tool_img_path),
+        return_nothing=args.tool_return_nothing,
+    )
+
     trainer = QwenGRPOTrainer(
         model=model,
         reward_funcs=pick_rewards(args),
@@ -241,7 +255,7 @@ def main(args: argparse.Namespace):
         peft_config=peft_config,
         tool_defn=ToolDefinition(
             stop_string="</op>",
-            call_tool=ImageMetadataReadTool(img_path=os.path.expanduser(args.tool_img_path)),
+            call_tool=tool,
         ),
     )
     trainer.train()
