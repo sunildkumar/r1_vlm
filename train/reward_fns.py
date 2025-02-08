@@ -108,7 +108,7 @@ def magicword_reward_func(completions, target, **kwargs):
             reward = 0.0
             content_lower = completion_conv[0]["content"].lower()
             for magic_word in magic_words:
-                reward += max(5, content_lower.count(magic_word))
+                reward += min(5, content_lower.count(magic_word))
             rewards.append(reward)
         except Exception as e:
             print(f"Error in magicword_reward_func: {e}")
