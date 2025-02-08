@@ -55,7 +55,7 @@ class ImageMetadataReadTool:
     def format_response(self, data: dict) -> str:
         """Format the response as a string."""
         if self.return_nothing:
-            return ""
+            return "\n"
         else:
             j = json.dumps(data)
             return f"Image metadata: {j}"
@@ -195,6 +195,7 @@ def main(args: argparse.Namespace):
         torch_dtype=model_config.torch_dtype,
         # has to be set to false for gradient checkpointing to work
         use_cache=False,
+        attn_implementation="flash_attention_2",
     )
 
     if args.use_lora:
@@ -218,9 +219,10 @@ def main(args: argparse.Namespace):
         output_dir="vlm-r1-aha-moment",
         learning_rate=args.learning_rate,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.001,  #  1M examples * 0.001 = 1000 steps
+        warmup_steps=0,
         logging_steps=1,
-        save_steps=1,
+        save_steps=50,
+        save_total_limit=10,
         # roughly 1M total training steps
         num_train_epochs=1,
         per_device_train_batch_size=1,

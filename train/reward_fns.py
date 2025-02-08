@@ -98,8 +98,8 @@ def tool_use_reward_func(completions, target, **kwargs):
 
     for completion_conv, gt in zip(completions, target):
         try:
-            # Look for <op>...</op>
-            match = re.search(r"<op>(.*?)<\/op>", completion_conv[0]["content"])
+            # Look for <op>...</op> - including across newlines
+            match = re.search(r"<op>([\s\S]*?)<\/op>", completion_conv[0]["content"])
             if match is None:
                 rewards.append(0.0)
             else:
