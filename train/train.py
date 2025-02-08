@@ -99,6 +99,12 @@ def parse_cli_args() -> argparse.Namespace:
         description="Train Qwen2.5-VL model with GRPOTrainer. Specify dataset load options."
     )
     parser.add_argument(
+        "--run_name",
+        type=str,
+        default="cocomath",
+        help="Name of the run",
+    )
+    parser.add_argument(
         "--rewards",
         type=str,
         default="cocomath",
@@ -221,7 +227,7 @@ def main(args: argparse.Namespace):
 
     # Hyperparameters
     training_args = GRPOConfig(
-        output_dir="vlm-r1-aha-moment",
+        output_dir=f"vlm-r1-{args.run_name}",
         learning_rate=args.learning_rate,
         lr_scheduler_type="cosine",
         warmup_steps=0,

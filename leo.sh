@@ -13,3 +13,4 @@ time uv run python train/train.py \
     --learning_rate 1e-6 \
     --rewards magicword \
     --num_generations 3 \
+    --run_name magicword 

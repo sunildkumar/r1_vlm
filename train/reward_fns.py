@@ -90,22 +90,26 @@ def format_numeric_answer_reward_func(completions, target, **kwargs):
 
 def magicword_reward_func(completions, target, **kwargs):
     """
-    Did they say the magic word?
+    Did they say the magic word?  Up to 5 points for each magic word.
     Returns:
         list[float]: Reward scores
     """
     rewards = []
 
-    magic_word = "abracadabra"
+    magic_words = [
+        "abracadabra",
+        "hocus pocus",
+        "please",
+        "poof",
+    ]
 
     for completion_conv, gt in zip(completions, target):
         try:
-            match = re.search(rf"({magic_word})", completion_conv[0]["content"])
-            if match is None:
-                rewards.append(0.0)
-            else:
-                rewards.append(1.0)
-
+            reward = 0.0
+            content_lower = completion_conv[0]["content"].lower()
+            for magic_word in magic_words:
+                reward += max(5, content_lower.count(magic_word))
+            rewards.append(reward)
         except Exception as e:
             print(f"Error in magicword_reward_func: {e}")
             rewards.append(0.0)
