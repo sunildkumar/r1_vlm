@@ -19,6 +19,7 @@ from reward_fns import (
     format_numeric_answer_reward_func,
     soft_answer_reward_func,
     tool_use_reward_func,
+    magicword_reward_func,
 )
 
 
@@ -169,6 +170,10 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
     elif args.rewards == "justtool":
         return [
             tool_use_reward_func,
+        ]
+    elif args.rewards == "magicword":
+        return [
+            magicword_reward_func,
         ]
     else:
         raise ValueError(f"Unknown rewards: {args.rewards}")

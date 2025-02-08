@@ -88,6 +88,39 @@ def format_numeric_answer_reward_func(completions, target, **kwargs):
     return rewards
 
 
+def magicword_reward_func(completions, target, **kwargs):
+    """
+    Did they say the magic word?
+    Returns:
+        list[float]: Reward scores
+    """
+    rewards = []
+
+    magic_word = "abracadabra"
+
+    for completion_conv, gt in zip(completions, target):
+        try:
+            match = re.search(rf"({magic_word})", completion_conv[0]["content"])
+            if match is None:
+                rewards.append(0.0)
+            else:
+                rewards.append(1.0)
+
+        except Exception as e:
+            print(f"Error in magicword_reward_func: {e}")
+            rewards.append(0.0)
+
+    print_reward(
+        "magicword_reward_func",
+        kwargs.get("prompts", []),
+        completions,
+        target,
+        rewards,
+        [], # no additional fields displayed
+        kwargs,
+    )
+    return rewards
+
 def tool_use_reward_func(completions, target, **kwargs):
     """
     Checks if the string inside <op>...</op> parses as a tool call.

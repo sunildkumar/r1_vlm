@@ -38,11 +38,8 @@ class TextOnlyMNIST:
         return self.image_path(random_code)
 
     def generate_r1_messages(self, code:str) -> dict:
-        counting_message = f"Use the tool to load the the image named 'img-{code}.jpeg' and tell me what number it is."
-        ending = "Show your work in <think> </think> tags and return the answer in <answer> </answer> tags."
-        tool_message = "If you need to load an image, you can invoke the image tool with the <op></op> syntax by writing a command in your thinking like this:\n<op>load: filename</op>\nand the image will be loaded."
-
-        instruction = f"{counting_message} {ending}"
+        instruction = f"This is a puzzle.  To unlock the puzzle, you must say the magic word."
+        tool_message = ""
 
         messages = [
             {
