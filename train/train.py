@@ -92,6 +92,20 @@ def fake_tool(x: str) -> str:
     return "You think he's a tool!  What about me?"
 
 
+class CompletelyEmptyToolDefinition(ToolDefinition):
+    """A tool definition that never activates the tool.
+    """
+
+    def __init__(self):
+        super().__init__(
+            stop_string="</op>",
+            call_tool=lambda x: x,
+        )
+
+    def completion_has_tool_call(self, completion: str) -> bool:
+        return False
+
+
 def parse_cli_args() -> argparse.Namespace:
     """
     Parses and returns command line arguments.
@@ -116,6 +130,12 @@ def parse_cli_args() -> argparse.Namespace:
         type=str,
         default="~/data/obfuscated_mnist",
         help="Path to the image to use for the tool",
+    )
+    parser.add_argument(
+        "--which_tool",
+        type=str,
+        default="imgmetadata",
+        help="Which tool to use",
     )
     parser.add_argument(
         "--load_from_local",
@@ -207,6 +227,10 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
         return [
             tool_use_reward_func,
         ]
+    elif args.rewards == "justformat":
+        return [
+            format_numeric_answer_reward_func,
+        ]
     elif args.rewards == "magicword":
         return [
             magicword_reward_func,
@@ -285,11 +309,6 @@ def main(args: argparse.Namespace):
         report_to="wandb",
     )
 
-    tool = ImageMetadataReadTool(
-        img_path=os.path.expanduser(args.tool_img_path),
-        return_nothing=args.tool_return_nothing,
-    )
-
     trainer = QwenGRPOTrainer(
         model=model,
         reward_funcs=pick_rewards(args),
@@ -299,13 +318,26 @@ def main(args: argparse.Namespace):
         train_dataset=dataset["train"],
         eval_dataset=dataset["validation"],
         peft_config=peft_config,
-        tool_defn=ToolDefinition(
-            stop_string="</op>",
-            call_tool=tool,
-        ),
+        tool_defn=tool_defn_from_args(args),
     )
     trainer.train()
 
+
+def tool_defn_from_args(args: argparse.Namespace) -> ToolDefinition | None:
+    if args.which_tool == "none":
+        return None
+    if args.which_tool == "imgmetadata":
+        tool = ImageMetadataReadTool(
+            img_path=os.path.expanduser(args.tool_img_path),
+            return_nothing=args.tool_return_nothing,
+        )
+        return ToolDefinition(
+            stop_string="</op>",
+            call_tool=tool,
+        )
+    if args.which_tool == "empty":
+        return CompletelyEmptyToolDefinition()
+    raise ValueError(f"Unknown tool: {args.which_tool}")
 
 if __name__ == "__main__":
     args = parse_cli_args()
