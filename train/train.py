@@ -40,6 +40,7 @@ class VerySimpleParser():
 
 class ImageMetadataReadTool:
     """Tool that pretends to load an image, but actually reads the metadata next to the image.
+    If return_nothing is True, the tool returns a newline character.  (Easy to mistake for real VLM output.)
     """
     def __init__(self, img_path: str, return_nothing: bool = False):
         self.img_path = os.path.expanduser(img_path)
@@ -145,6 +146,12 @@ def parse_cli_args() -> argparse.Namespace:
         help="Learning rate",
     )
     parser.add_argument(
+        "--warmup_steps",
+        type=int,
+        default=50,
+        help="Number of warmup steps",
+    )
+    parser.add_argument(
         "--num_generations",
         type=int,
         default=5,
@@ -190,6 +197,11 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
             format_numeric_answer_reward_func,
             tool_use_reward_func,
             answer_reward_func,
+        ]
+    elif args.rewards == "toolformat":
+        return [
+            tool_use_reward_func,
+            format_numeric_answer_reward_func,
         ]
     elif args.rewards == "justtool":
         return [
@@ -249,9 +261,10 @@ def main(args: argparse.Namespace):
     training_args = GRPOConfig(
         output_dir=f"vlm-r1-{args.run_name}",
         learning_rate=args.learning_rate,
+        adam_beta2=0.95,  # Faster adaptation to changes in variance
         max_grad_norm=args.max_grad_norm,
         lr_scheduler_type="cosine",
-        warmup_steps=50,
+        warmup_steps=args.warmup_steps,
         logging_steps=1,
         save_steps=100,
         save_total_limit=10,
@@ -266,7 +279,7 @@ def main(args: argparse.Namespace):
         max_prompt_length=1024,
         max_completion_length=args.max_completion_length,
         num_generations=args.num_generations,
-        beta=0.001,
+        beta=0.001,  # KL penalty
         # TODO: True? using vllm seems like a good idea.
         use_vllm=False,
         report_to="wandb",

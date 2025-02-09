@@ -127,24 +127,26 @@ def magicword_reward_func(completions, target, **kwargs):
 
 def tool_use_reward_func(completions, target, **kwargs):
     """
-    Checks if the string inside <op>...</op> parses as a tool call.
+    Rewards it for using the tool, or for trying.
     Returns:
         list[float]: Reward scores
     """
     rewards = []
 
-    for completion_conv, gt in zip(completions, target):
-        try:
-            # Look for <op>...</op> - including across newlines
-            match = re.search(r"<op>([\s\S]*?)<\/op>", completion_conv[0]["content"])
-            if match is None:
-                rewards.append(0.0)
-            else:
-                rewards.append(1.0)
+    def score(x: str) -> float:
+        if re.search(r"<op>([\s\S]*?)<\/op>", x):
+            return 2.0  # Full credit.
+        out = 0.0
+        if "op" in x:
+            out += 0.4
+        if "<op>" in x:
+            out += 0.3
+        if "</op>" in x:
+            out += 0.3
+        return out
 
-        except Exception as e:
-            print(f"Error in tool_use_reward_func: {e}")
-            rewards.append(0.0)
+    for completion_conv, gt in zip(completions, target):
+        rewards.append(score(completion_conv[0]["content"]))
 
     print_reward(
         "tool_use_reward_func",
