@@ -1,3 +1,5 @@
+*.swp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -179,3 +181,4 @@ cython_debug/
 /vlm-r1-digit-recognition-run-1
 # folder with the data for counting mnist
 counting-mnist/
+/vlm-r1-*

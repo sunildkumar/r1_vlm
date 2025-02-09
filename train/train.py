@@ -7,7 +7,7 @@ import os
 from datasets import load_dataset, load_from_disk
 from peft import LoraConfig
 from prepare_inputs import tokenize_and_inject_images
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 from trl import GRPOConfig, ModelConfig
 from trl.trainer import QwenGRPOTrainer, ToolDefinition
 import trl
@@ -96,7 +96,7 @@ def parse_cli_args() -> argparse.Namespace:
     Parses and returns command line arguments.
     """
     parser = argparse.ArgumentParser(
-        description="Train Qwen2.5-VL model with GRPOTrainer. Specify dataset load options."
+        description="Train Qwen model with GRPOTrainer. Specify dataset load options."
     )
     parser.add_argument(
         "--run_name",
@@ -155,6 +155,24 @@ def parse_cli_args() -> argparse.Namespace:
         action="store_true",
         help="Return nothing from the tool",
     )
+    parser.add_argument(
+        "--gradient_accumulation_steps",
+        type=int,
+        default=1,
+        help="Number of gradient accumulation steps",
+    )
+    parser.add_argument(
+        "--max_grad_norm",
+        type=float,
+        default=1.0,
+        help="Maximum gradient norm",
+    )
+    parser.add_argument(
+        "--loss_magnifier",
+        type=float,
+        default=1.0e4,
+        help="Multiplies the loss on the way out to avoid underflow.",
+    )
     return parser.parse_args()
 
 
@@ -186,7 +204,7 @@ def pick_rewards(args: argparse.Namespace) -> list[Callable]:
 
 def main(args: argparse.Namespace):
     """
-    Main training routine for Qwen2.5-VL model using GRPOTrainer.
+    Main training routine for Qwen model using GRPOTrainer.
     """
     if args.load_from_local:
         dataset = load_from_disk(args.local_path)
@@ -197,11 +215,13 @@ def main(args: argparse.Namespace):
 
     # load the model
     model_config = ModelConfig(
-        model_name_or_path="Qwen/Qwen2.5-VL-3B-Instruct",
+        #model_name_or_path="Qwen/Qwen2.5-VL-3B-Instruct",
+        model_name_or_path="Qwen/Qwen2-VL-2B-Instruct",
         torch_dtype="bfloat16",
         use_peft=True,
     )
-    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    #model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    model = Qwen2VLForConditionalGeneration.from_pretrained(
         pretrained_model_name_or_path=model_config.model_name_or_path,
         torch_dtype=model_config.torch_dtype,
         # has to be set to false for gradient checkpointing to work
@@ -229,15 +249,15 @@ def main(args: argparse.Namespace):
     training_args = GRPOConfig(
         output_dir=f"vlm-r1-{args.run_name}",
         learning_rate=args.learning_rate,
+        max_grad_norm=args.max_grad_norm,
         lr_scheduler_type="cosine",
-        warmup_steps=0,
+        warmup_steps=50,
         logging_steps=1,
-        save_steps=50,
+        save_steps=100,
         save_total_limit=10,
-        # roughly 1M total training steps
         num_train_epochs=1,
         per_device_train_batch_size=1,
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=args.gradient_accumulation_steps,
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         bf16=True,

@@ -38,7 +38,7 @@ class TextOnlyMNIST:
         return self.image_path(random_code)
 
     def generate_r1_messages(self, code:str) -> dict:
-        instruction = f"This is a puzzle.  To unlock the puzzle, you must say the magic word.  What are classic magic words that get things done?"
+        instruction = f"This is a puzzle.  To win, you must say the magic word.  There are many classic magic words that perform spells or convince people to help you.  Remember to ask nicely."
         tool_message = ""
 
         messages = [
