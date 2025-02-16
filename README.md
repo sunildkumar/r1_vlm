@@ -68,6 +68,12 @@ CUDA_VISIBLE_DEVICES=1 uv run train/train_message_decoding_words.py
 # 3b word decoding 3 gpu
 CUDA_VISIBLE_DEVICES=1,2,3 uv run accelerate launch --config_file train/multi_gpu_3only.yaml train/train_message_decoding_words.py 2>&1 | tee message_decoding_words_logs_$(date +%Y%m%d_%H%M%S).log
 
+
+
+# 3b message decoding words vllm 3 gpu for train, 1 for vllm
+CUDA_VISIBLE_DEVICES=0,1,2,3 uv run accelerate launch --config_file train/multi_gpu_3only.yaml train/train_message_decoding_words_vllm.py 2>&1 | tee message_decoding_words_vllm_logs_$(date +%Y%m%d_%H%M%S).log
+
+
 ```
 
 ## Results

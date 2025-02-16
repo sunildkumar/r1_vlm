@@ -181,3 +181,4 @@ cython_debug/
 # folder with the data for counting mnist
 counting-mnist/
 dataset/*
+.gradio/certificate.pem

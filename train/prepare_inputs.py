@@ -5,11 +5,14 @@ def tokenize_and_inject_images(*, inputs, processing_class):
     """
     inputs: a list of inputs, in this case a list of examples from our dataset
     processing_class: the processing class to use to process the inputs. This is a VLM processor object from the transformers library.
+    use_vllm: whether the trainer is using vllm or not. If we are not using vllm, we need to tokenize the data ourselves. OTOH if we aren't,
+    we have to prepare the data in the way that vllm expects.
 
     This is sorta like a collation function but for GRPO
 
     returns:
-        - batch: a batch of inputs ready for training
+        - batch: a batch of inputs ready for standard generation
+        - vllm_inputs: a batch of inputs ready for vllm generation
         - texts: The full prompts (in text) that were used to generate the batch
         - conversations: The conversations in conversation format
     """
@@ -40,9 +43,15 @@ def tokenize_and_inject_images(*, inputs, processing_class):
         return_tensors="pt",
     )
 
-    # NOTE: There is no need to create labels as we are not autoregressively training!
+    # https://github.com/QwenLM/Qwen2.5-VL README has a section "Inference Locally" that covers this.
+    vllm_inputs = []
+    for conversation, text in zip(conversations, texts):
+        vllm_image_inputs, _ = process_vision_info(conversation)
+        mm_data = {"image": vllm_image_inputs}
+        vllm_input = {"prompt": text, "multi_modal_data": mm_data}
+        vllm_inputs.append(vllm_input)
 
-    return batch, texts, conversations
+    return batch, vllm_inputs, texts, conversations
 
 
 def test_tokenizing(conversations):
