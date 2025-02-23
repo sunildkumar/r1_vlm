@@ -1201,19 +1201,6 @@ wheels = [
 ]
 
 [[package]]
-name = "liger-kernel"
-version = "0.5.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "torch" },
-    { name = "triton" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/26/4d/c33c72dd6147d3c3e53c41217480fae3b9e91d7d00906fa24c4b56225353/liger_kernel-0.5.3.tar.gz", hash = "sha256:65f97089da4d9383695fdead19ece482d98165aa309cc5349d6c26654663e301", size = 3464134 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/4c/34/d18324fac47766a223f14ffd045a529988d94596ba1f9a88d8c3368cc095/liger_kernel-0.5.3-py3-none-any.whl", hash = "sha256:0a4770e5c2610e579fbad646422c1a5f71ef19e21ce4a21f6eeb2c65df1fd01b", size = 113615 },
-]
-
-[[package]]
 name = "lm-format-enforcer"
 version = "0.10.10"
 source = { registry = "https://pypi.org/simple" }
@@ -2412,7 +2399,6 @@ dependencies = [
     { name = "accelerate" },
     { name = "datasets" },
     { name = "deepspeed" },
-    { name = "flash-attn" },
     { name = "gradio" },
     { name = "imgcat" },
     { name = "ipdb" },
@@ -2430,12 +2416,17 @@ dependencies = [
     { name = "wandb" },
 ]
 
+[package.optional-dependencies]
+gpu = [
+    { name = "flash-attn" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.3.0" },
     { name = "datasets", specifier = ">=3.2.0" },
     { name = "deepspeed", specifier = ">=0.16.3" },
-    { name = "flash-attn", specifier = ">=2.7.3" },
+    { name = "flash-attn", marker = "extra == 'gpu'", specifier = ">=2.7.3" },
     { name = "gradio", specifier = ">=5.16.0" },
     { name = "imgcat", specifier = ">=0.6.0" },
     { name = "ipdb", specifier = ">=0.13.13" },
@@ -3020,7 +3011,7 @@ name = "triton"
 version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "filelock" },
+    { name = "filelock", marker = "python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/78/eb/65f5ba83c2a123f6498a3097746607e5b2f16add29e36765305e4ac7fdd8/triton-3.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c8182f42fd8080a7d39d666814fa36c5e30cc00ea7eeeb1a2983dbb4c99a0fdc", size = 209551444 },
@@ -3073,8 +3064,8 @@ requires-dist = [
     { name = "scikit-learn", marker = "extra == 'dev'" },
     { name = "scikit-learn", marker = "extra == 'scikit'" },
     { name = "transformers", specifier = ">=4.46.0" },
-    { name = "vllm", marker = "sys_platform != 'win32' and extra == 'dev'", specifier = ">=0.7.1" },
-    { name = "vllm", marker = "sys_platform != 'win32' and extra == 'vllm'", specifier = ">=0.7.1" },
+    { name = "vllm", marker = "sys_platform != 'win32' and extra == 'dev'" },
+    { name = "vllm", marker = "sys_platform != 'win32' and extra == 'vllm'" },
 ]
 
 [[package]]
@@ -3170,8 +3161,6 @@ source = { editable = "../verifiers" }
 dependencies = [
     { name = "accelerate" },
     { name = "deepspeed" },
-    { name = "flash-attn" },
-    { name = "liger-kernel" },
     { name = "setuptools" },
     { name = "torch" },
     { name = "trl" },
@@ -3183,8 +3172,8 @@ dependencies = [
 requires-dist = [
     { name = "accelerate", specifier = ">=1.3.0" },
     { name = "deepspeed", specifier = ">=0.15.4" },
-    { name = "flash-attn", specifier = "==2.7.3" },
-    { name = "liger-kernel", specifier = ">=0.5.2" },
+    { name = "flash-attn", marker = "extra == 'gpu'", specifier = "==2.7.3" },
+    { name = "liger-kernel", marker = "extra == 'gpu'", specifier = ">=0.5.2" },
     { name = "setuptools" },
     { name = "torch", specifier = ">=2.5.1" },
     { name = "trl", editable = "../trl" },
