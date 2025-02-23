@@ -3,6 +3,11 @@ from typing import Callable
 from torch.utils.data import Sampler
 from transformers import Trainer
 
+from r1_vlm.trainer.interfaces import EnvironmentInput, EnvironmentOutput
+
+EnvironmentInput
+EnvironmentOutput
+
 RewardFunc = Callable[[list, list], list[float]]
 
 class VLMR1Trainer(Trainer):
@@ -36,12 +41,23 @@ class VLMR1Trainer(Trainer):
     def compute_loss(self):
         raise NotImplementedError()
     
-    def prediction_step(self):
-        raise NotImplementedError()
+    def prediction_step(
+        self,
+        model,
+        inputs,
+        prediction_loss_only,
+        ignore_keys: Optional[list[str]] = None,
+    ):
+        inputs = self._prepare_inputs(inputs)
+        #with torch.no_grad():
+        #    with self.compute_loss_context_manager():
+        #        loss = self.compute_loss(model, inputs)
+        #    loss = loss.mean().detach()
+        #return loss, None, None
     
     def log(self):
         raise NotImplementedError()
 
     
     
-    
+        
