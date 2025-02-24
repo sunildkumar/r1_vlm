@@ -32,6 +32,10 @@ dependencies = [
     "vllm>=0.7.2",
     "wandb>=0.19.5",
     "verifiers",
+]
+
+[project.optional-dependencies]
+gpu = [
     "flash-attn>=2.7.3",
 ]
 
