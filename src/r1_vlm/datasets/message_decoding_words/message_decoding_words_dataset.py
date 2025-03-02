@@ -12,12 +12,11 @@ random.seed(42)
 # creates a dataset mapping scrambled words to their unscrambled form. Includes decoder as an image.
 
 
-def generate_mapping():
+def generate_mapping(alphabet: list[str] = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")):
     """
     maps each character in the alphabet to a unique random character in the alphabet,
     creating a bijective mapping.
     """
-    alphabet = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     shuffled = alphabet.copy()
     random.shuffle(shuffled)
     mapping = dict(zip(alphabet, shuffled))
@@ -146,6 +145,7 @@ def create_dataset():
     message_decoding_dataset.push_to_hub(
         "sunildkumar/message-decoding-words", token=os.getenv("HUGGINGFACE_HUB_TOKEN")
     )
+
 
 if __name__ == "__main__":
     message_decoding_dataset = create_dataset()

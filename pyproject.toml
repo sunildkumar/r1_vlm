@@ -33,6 +33,8 @@ dependencies = [
     "wandb>=0.19.5",
     "verifiers",
     "flash-attn>=2.7.3",
+    "levenshtein>=0.26.1",
+    "imageio>=2.37.0",
 ]
 
 [tool.hatch.metadata]
