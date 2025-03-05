@@ -30,7 +30,11 @@ dependencies = [
     "transformers @ git+https://github.com/huggingface/transformers.git@main",
     "vllm>=0.7.2",
     "wandb>=0.19.5",
-    "verifiers",
+
+    # Groundlight's forks of TRL and Verifiers
+    "trl @ git+https://github.com/groundlight/trl.git@add_verifiers_support",
+    "verifiers @ git+https://github.com/groundlight/verifiers.git@add_verifiers_support",
+
     "flash-attn>=2.7.3",
     "spaces>=0.32.0",
     "imageio>=2.37.0",
