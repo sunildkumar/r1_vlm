@@ -44,9 +44,9 @@ dependencies = [
 [tool.hatch.metadata]
 allow-direct-references = true
 
-[tool.uv.sources]
-trl = { path = "../trl", editable = true }
-verifiers = { path = "../verifiers", editable = true }
+#[tool.uv.sources]
+#trl = { path = "../trl", editable = true }
+#verifiers = { path = "../verifiers", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/r1_vlm"]
