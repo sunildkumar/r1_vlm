@@ -26,8 +26,8 @@ dependencies = [
     "qwen-vl-utils>=0.0.10",
     "torch==2.5.1",
     "torchvision==0.20.1",
-    # I need the latest version of transformers for qwen2.5vl, I should lock this down once they release a new version
-    "transformers @ git+https://github.com/huggingface/transformers.git@main",
+    # Later versions break the qwen2.5vl processor.
+    "transformers @ git+https://github.com/huggingface/transformers.git@1931a351408dbd1d0e2c4d6d7ee0eb5e8807d7bf",
     "vllm>=0.7.2",
     "wandb>=0.19.5",
     "verifiers",

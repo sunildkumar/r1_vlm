@@ -2,6 +2,7 @@
 # run with CUDA_VISIBLE_DEVICES=0,1 uv run attention_demo/demo.py
 import imageio.v3 as imageio
 import numpy as np
+import torch
 from datasets import load_dataset
 from PIL import Image, ImageDraw, ImageFont
 from qwen_vl_utils import process_vision_info
@@ -10,7 +11,11 @@ from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
 
 def visualize_attention_step(
-    attention_weights_step, token_ids, processor, start_phrase="The coded message is"
+    attention_weights_step,
+    token_ids,
+    processor,
+    start_phrase="The coded message is",
+    use_color=False,
 ):
     # attention_weights_step shape is [1, 16, seq_len, seq_len]
     # First squeeze out the batch dimension
@@ -59,10 +64,10 @@ def visualize_attention_step(
     tokens = tokens[token_start_idx:]
     scaled_weights = scaled_weights[token_start_idx:]
 
-    # Create a black image
+    # Create a black image (changed from white to black)
     img_width = 2500
     img_height = 2500
-    image = Image.new("RGB", (img_width, img_height), "white")
+    image = Image.new("RGB", (img_width, img_height), "black")
     draw = ImageDraw.Draw(image)
 
     # Try to load a monospace font, fallback to default if not available
@@ -98,10 +103,17 @@ def visualize_attention_step(
                     if i == len(tokens) - 1:
                         color = (100, 150, 255)  # Light blue for current token
                     else:
-                        # Create red to green gradient based on attention weight
-                        red = int(255 * (1 - weight))
-                        green = int(255 * weight)
-                        color = (red, green, 0)
+                        if use_color:
+                            # Create red to green gradient based on attention weight
+                            red = int(255 * (1 - weight))
+                            green = int(255 * weight)
+                            color = (red, green, 0)
+                        else:
+                            color = (
+                                255,
+                                255,
+                                255,
+                            )  # White color when use_color is False
 
                     # Draw the part
                     draw.text((x, y), part, fill=color, font=font)
@@ -127,10 +139,17 @@ def visualize_attention_step(
         if i == len(tokens) - 1:
             color = (100, 150, 255)  # Light blue for current token
         else:
-            # Create red to green gradient based on attention weight
-            red = int(255 * (1 - weight))
-            green = int(255 * weight)
-            color = (red, green, 0)
+            if use_color:
+                # Create red to green gradient based on attention weight
+                red = int(255 * (1 - weight))
+                green = int(255 * weight)
+                color = (red, green, 0)
+            else:
+                color = (
+                    255,
+                    255,
+                    255,
+                )  # White color when use_color is False (changed from black)
 
         # Draw the token
         draw.text((x, y), token, fill=color, font=font)
@@ -157,45 +176,49 @@ def combine_attention_videos(text_frames, image_frames):
 
     combined_frames = []
     for text_frame, image_frame in zip(text_frames, image_frames):
-        # Calculate target height (same as text frame)
-        target_height = text_frame.shape[0]
-        target_width = text_frame.shape[1] // 2  # Half the width of text frame
+        # Get dimensions
+        text_height, text_width = text_frame.shape[:2]
+        image_padding_width = text_width // 2  # Space to allocate for image
 
-        # Calculate scaling factor to maintain aspect ratio
-        image_aspect = image_frame.shape[1] / image_frame.shape[0]
-        target_aspect = target_width / target_height
+        # extend the right edge of the text frame
+        extended_width = text_width + image_padding_width
+        canvas = np.zeros(
+            (text_height, extended_width, 3), dtype=np.uint8
+        )  # Black background
 
-        if image_aspect > target_aspect:
-            # Image is wider than target - fit to width
-            new_width = target_width
-            new_height = int(target_width / image_aspect)
-            vertical_padding = (target_height - new_height) // 2
-            horizontal_padding = 0
-        else:
-            # Image is taller than target - fit to height
-            new_height = target_height
-            new_width = int(target_height * image_aspect)
-            horizontal_padding = (target_width - new_width) // 2
-            vertical_padding = 0
+        # Copy the text frame to the left side
+        canvas[:, :text_width] = text_frame
 
-        # Resize image maintaining aspect ratio
+        # resize image
+        image_width = int(0.55 * text_height)
+        image_height = image_width
+
         image_frame_resized = Image.fromarray(image_frame).resize(
-            (new_width, new_height), Image.Resampling.LANCZOS
+            (image_width, image_height), Image.Resampling.LANCZOS
         )
         image_frame_resized = np.array(image_frame_resized)
 
-        # white background
-        canvas = np.full((target_height, target_width, 3), 255, dtype=np.uint8)
+        # place image on the canvas - define the top left corner
+        # 1450 works
+        top_left_x = 1000
+        top_left_y = 600
 
-        # Place resized image in center of canvas
-        y_start = vertical_padding
-        y_end = y_start + new_height
-        x_start = horizontal_padding
-        x_end = x_start + new_width
-        canvas[y_start:y_end, x_start:x_end] = image_frame_resized
+        combined_frame = canvas.copy()
 
-        # Combine frames horizontally
-        combined_frame = np.hstack([text_frame, canvas])
+        combined_frame[
+            top_left_y : top_left_y + image_height,
+            top_left_x : top_left_x + image_width,
+        ] = image_frame_resized  # noqa: E203
+
+        # crop to where the image ends in x plus padding
+        top_right_x = top_left_x + image_width + 20
+
+        # Ensure the width is even (required by video codecs)
+        if top_right_x % 2 != 0:
+            top_right_x += 1  # Make it even by adding 1 if it's odd
+
+        combined_frame = combined_frame[:, :top_right_x]  # noqa: E203
+
         combined_frames.append(combined_frame)
 
     return combined_frames
@@ -209,6 +232,7 @@ def create_attention_visualization(
     fps=2,
     output_path="attention_visualization.mp4",
     start_phrase="The coded message is",
+    use_color=False,
 ):
     """
     Create a video visualization of attention weights during generation.
@@ -221,6 +245,7 @@ def create_attention_visualization(
         fps: Frames per second for output video (default: 2)
         output_path: Path to save the output video (default: "attention_visualization.mp4")
         start_phrase: Phrase to start visualization from (default: "The coded message is")
+        use_color: Whether to color the text according to attention weights (default: True)
     """
     num_steps = len(attention_weights)
     base_sequence = sequences.shape[1] - num_steps
@@ -234,7 +259,11 @@ def create_attention_visualization(
         ]  # get specified layer's attention
         current_tokens = sequences[0][: base_sequence + step]
         frame = visualize_attention_step(
-            attention_weights_step, current_tokens, processor, start_phrase=start_phrase
+            attention_weights_step,
+            current_tokens,
+            processor,
+            start_phrase=start_phrase,
+            use_color=use_color,
         )
         frames.append(frame)
 
@@ -424,7 +453,7 @@ if __name__ == "__main__":
     example = dataset[np.random.randint(0, len(dataset))]
 
     # inject our message in place of the original one
-    message = "groundlight loves ml"
+    message = "im trained with grpo"
 
     # how to encode message - we need to reverse the mapping
     mapping = example["mapping"]
@@ -470,23 +499,26 @@ if __name__ == "__main__":
     inputs = inputs.to("cuda")
 
     print("Starting generation")
-    generated_output = model.generate(
-        **inputs,
-        temperature=1.0,
-        max_new_tokens=512,
-        output_attentions=True,
-        return_dict_in_generate=True,
-    )
+    with torch.no_grad():
+        generated_output = model.generate(
+            **inputs,
+            temperature=1.0,
+            max_new_tokens=512,
+            output_attentions=True,
+            return_dict_in_generate=True,
+        )
     print("Generation complete")
 
-    # print the generated text
-    print(
-        processor.decode(
-            generated_output.sequences[0],
-            skip_special_tokens=False,
-            clean_up_tokenization_spaces=False,
-        )
+    generated_text = processor.decode(
+        generated_output.sequences[0],
+        skip_special_tokens=False,
+        clean_up_tokenization_spaces=False,
     )
+    # print the generated text
+    print(generated_text)
+    import ipdb
+
+    ipdb.set_trace()
 
     # create visualizations for layer 20
     layer_idx = 20
@@ -510,5 +542,8 @@ if __name__ == "__main__":
 
     # Combine frames and save video
     combined_frames = combine_attention_videos(text_frames, image_frames)
-    output_path = f"combined_attention_visualization_layer{layer_idx}.mp4"
-    imageio.imwrite(output_path, combined_frames, fps=2, codec="libx264")
+    # Save videos at different frame rates
+    for fps in [2, 5, 10]:
+        output_path = f"combined_attention_visualization_layer{layer_idx}_{fps}fps.mp4"
+        print(f"Saving video at {fps} fps to {output_path}")
+        imageio.imwrite(output_path, combined_frames, fps=fps, codec="libx264")
