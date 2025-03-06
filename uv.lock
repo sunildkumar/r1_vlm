@@ -2419,7 +2419,6 @@ dependencies = [
     { name = "accelerate" },
     { name = "datasets" },
     { name = "deepspeed" },
-    { name = "flash-attn" },
     { name = "gradio" },
     { name = "imageio" },
     { name = "imgcat" },
@@ -2440,12 +2439,17 @@ dependencies = [
     { name = "wandb" },
 ]
 
+[package.optional-dependencies]
+flash-attn = [
+    { name = "flash-attn" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.3.0" },
     { name = "datasets", specifier = ">=3.2.0" },
     { name = "deepspeed", specifier = ">=0.16.3" },
-    { name = "flash-attn", specifier = ">=2.7.3" },
+    { name = "flash-attn", marker = "extra == 'flash-attn'", specifier = ">=2.7.3" },
     { name = "gradio", specifier = ">=5.16.0" },
     { name = "imageio", specifier = ">=2.37.0" },
     { name = "imgcat", specifier = ">=0.6.0" },
@@ -2465,6 +2469,7 @@ requires-dist = [
     { name = "vllm", specifier = ">=0.7.2" },
     { name = "wandb", specifier = ">=0.19.5" },
 ]
+provides-extras = ["flash-attn"]
 
 [[package]]
 name = "rapidfuzz"
