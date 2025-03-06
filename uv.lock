@@ -1257,19 +1257,6 @@ wheels = [
 ]
 
 [[package]]
-name = "liger-kernel"
-version = "0.5.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "torch" },
-    { name = "triton" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/96/d4e78c98bbd4c625de5fd999272a8d599652995d7386f01c5e7f5d982f87/liger_kernel-0.5.4.tar.gz", hash = "sha256:06af08e67d053c45ab0e85eff63aa229c4a342b984a8691e4374837f335224e1", size = 3558869 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/71/847f737552bb592be60df05fdc2164f1e4022877ca44850f182581721b65/liger_kernel-0.5.4-py3-none-any.whl", hash = "sha256:0f4c56496f694af30de197d308982781863b0a64d7024d4ea57139f4425ef3b2", size = 122851 },
-]
-
-[[package]]
 name = "llvmlite"
 version = "0.43.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2472,9 +2459,9 @@ requires-dist = [
     { name = "spaces", specifier = ">=0.32.0" },
     { name = "torch", specifier = "==2.5.1" },
     { name = "torchvision", specifier = "==0.20.1" },
-    { name = "transformers", git = "https://github.com/huggingface/transformers.git?rev=main" },
-    { name = "trl", editable = "../trl" },
-    { name = "verifiers", editable = "../verifiers" },
+    { name = "transformers", git = "https://github.com/huggingface/transformers.git?rev=1931a351408dbd1d0e2c4d6d7ee0eb5e8807d7bf" },
+    { name = "trl", git = "https://github.com/groundlight/trl.git?rev=add_verifiers_support" },
+    { name = "verifiers", git = "https://github.com/groundlight/verifiers.git?rev=add_verifiers_support" },
     { name = "vllm", specifier = ">=0.7.2" },
     { name = "wandb", specifier = ">=0.19.5" },
 ]
@@ -3062,8 +3049,8 @@ wheels = [
 
 [[package]]
 name = "transformers"
-version = "4.50.0.dev0"
-source = { git = "https://github.com/huggingface/transformers.git?rev=main#66f29aaaf55c8fe0c3dbcd24beede2ca4effac56" }
+version = "4.49.0.dev0"
+source = { git = "https://github.com/huggingface/transformers.git?rev=1931a351408dbd1d0e2c4d6d7ee0eb5e8807d7bf#1931a351408dbd1d0e2c4d6d7ee0eb5e8807d7bf" }
 dependencies = [
     { name = "filelock" },
     { name = "huggingface-hub" },
@@ -3082,7 +3069,7 @@ name = "triton"
 version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "filelock" },
+    { name = "filelock", marker = "python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/78/eb/65f5ba83c2a123f6498a3097746607e5b2f16add29e36765305e4ac7fdd8/triton-3.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c8182f42fd8080a7d39d666814fa36c5e30cc00ea7eeeb1a2983dbb4c99a0fdc", size = 209551444 },
@@ -3091,54 +3078,13 @@ wheels = [
 [[package]]
 name = "trl"
 version = "0.15.0.dev0"
-source = { editable = "../trl" }
+source = { git = "https://github.com/groundlight/trl.git?rev=add_verifiers_support#546cab4fcd2f96c36116018f4828dad5654ba26c" }
 dependencies = [
     { name = "accelerate" },
     { name = "datasets" },
     { name = "rich" },
     { name = "transformers" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "accelerate", specifier = ">=0.34.0" },
-    { name = "bitsandbytes", marker = "extra == 'dev'" },
-    { name = "bitsandbytes", marker = "extra == 'quantization'" },
-    { name = "datasets", specifier = ">=2.21.0" },
-    { name = "deepspeed", marker = "sys_platform != 'win32' and extra == 'deepspeed'", specifier = ">=0.14.4" },
-    { name = "deepspeed", marker = "sys_platform != 'win32' and extra == 'dev'", specifier = ">=0.14.4" },
-    { name = "diffusers", marker = "extra == 'dev'", specifier = ">=0.18.0" },
-    { name = "diffusers", marker = "extra == 'diffusers'", specifier = ">=0.18.0" },
-    { name = "liger-kernel", marker = "sys_platform != 'win32' and extra == 'dev'", specifier = ">=0.4.0" },
-    { name = "liger-kernel", marker = "sys_platform != 'win32' and extra == 'liger'", specifier = ">=0.4.0" },
-    { name = "llm-blender", marker = "extra == 'dev'", specifier = ">=0.0.2" },
-    { name = "llm-blender", marker = "extra == 'judges'", specifier = ">=0.0.2" },
-    { name = "mergekit", marker = "extra == 'dev'", specifier = ">=0.0.5.1" },
-    { name = "mergekit", marker = "extra == 'mergekit'", specifier = ">=0.0.5.1" },
-    { name = "openai", marker = "extra == 'dev'", specifier = ">=1.23.2" },
-    { name = "openai", marker = "extra == 'judges'", specifier = ">=1.23.2" },
-    { name = "parameterized", marker = "extra == 'dev'" },
-    { name = "parameterized", marker = "extra == 'test'" },
-    { name = "peft", marker = "extra == 'dev'", specifier = ">=0.8.0" },
-    { name = "peft", marker = "extra == 'peft'", specifier = ">=0.8.0" },
-    { name = "pillow", marker = "extra == 'dev'" },
-    { name = "pillow", marker = "extra == 'vlm'" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest", marker = "extra == 'test'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'test'" },
-    { name = "pytest-rerunfailures", marker = "extra == 'dev'" },
-    { name = "pytest-rerunfailures", marker = "extra == 'test'" },
-    { name = "pytest-xdist", marker = "extra == 'dev'" },
-    { name = "pytest-xdist", marker = "extra == 'test'" },
-    { name = "rich" },
-    { name = "scikit-learn", marker = "extra == 'dev'" },
-    { name = "scikit-learn", marker = "extra == 'scikit'" },
-    { name = "transformers", specifier = ">=4.46.0" },
-    { name = "vllm", marker = "sys_platform != 'win32' and extra == 'dev'", specifier = ">=0.7.1" },
-    { name = "vllm", marker = "sys_platform != 'win32' and extra == 'vllm'", specifier = ">=0.7.1" },
-]
-provides-extras = ["deepspeed", "diffusers", "judges", "liger", "mergekit", "peft", "quantization", "scikit", "test", "vllm", "vlm", "dev"]
 
 [[package]]
 name = "typer"
@@ -3229,29 +3175,14 @@ wheels = [
 [[package]]
 name = "verifiers"
 version = "0.1.0"
-source = { editable = "../verifiers" }
+source = { git = "https://github.com/groundlight/verifiers.git?rev=add_verifiers_support#28aaf44346b913dd5915dd0553d878bf5401e44d" }
 dependencies = [
     { name = "accelerate" },
     { name = "deepspeed" },
-    { name = "flash-attn" },
-    { name = "liger-kernel" },
     { name = "setuptools" },
     { name = "torch" },
     { name = "trl" },
     { name = "vllm" },
-    { name = "wandb" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "accelerate", specifier = ">=1.3.0" },
-    { name = "deepspeed", specifier = ">=0.15.4" },
-    { name = "flash-attn", specifier = "==2.7.3" },
-    { name = "liger-kernel", specifier = ">=0.5.2" },
-    { name = "setuptools" },
-    { name = "torch", specifier = ">=2.5.1" },
-    { name = "trl", editable = "../trl" },
-    { name = "vllm", specifier = ">=0.7.2" },
     { name = "wandb" },
 ]
 
