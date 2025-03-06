@@ -34,12 +34,13 @@ dependencies = [
     # Groundlight's forks of TRL and Verifiers
     "trl @ git+https://github.com/groundlight/trl.git@add_verifiers_support",
     "verifiers @ git+https://github.com/groundlight/verifiers.git@add_verifiers_support",
-
-    "flash-attn>=2.7.3",
     "spaces>=0.32.0",
     "imageio>=2.37.0",
     "levenshtein>=0.27.1",
 ]
+[project.optional-dependencies]
+flash-attn = ["flash-attn>=2.7.3"]
+
 
 [tool.hatch.metadata]
 allow-direct-references = true
